@@ -84,8 +84,8 @@ const css = `
   }
   button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  .btn-accent { background: var(--accent); color: #000; }
-  .btn-accent:hover:not(:disabled) { background: #d4ff1a; transform: translateY(-1px); }
+  .btn-accent { background: var(--sap-blue-7); color: #fff; font-weight: 700; }
+  .btn-accent:hover:not(:disabled) { background: #1a7ff5; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,112,242,0.4); }
 
   .btn-ghost {
     background: transparent;
@@ -174,12 +174,15 @@ const css = `
 
 // ─── SAP LOGO SVG ────────────────────────────────────────────────────────────
 
-function SAPLogo({ size = 28 }) {
+function SAPLogo({ size = 32 }) {
+  // Logo SAP oficial: cuadrado azul con triángulo blanco (la "flecha" del brand)
   return (
-    <svg width={size} height={size} viewBox="0 0 28 28" fill="none">
-      <rect width="28" height="28" rx="3" fill="#0070F2"/>
-      <path d="M4 20L12 8h4L8 20H4z" fill="white"/>
-      <path d="M12 20l4-6 4 6h-4l-2-3-2 3h-4z" fill="white" opacity="0.7"/>
+    <svg width={size} height={size} viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="44" height="44" rx="4" fill="#0070F2"/>
+      {/* Triángulo principal — la "flecha" blanca diagonal del logo SAP */}
+      <polygon points="10,10 34,10 34,34" fill="white"/>
+      {/* Línea de detalle — el borde interior translúcido */}
+      <line x1="10" y1="10" x2="34" y2="34" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5"/>
     </svg>
   );
 }
@@ -490,7 +493,7 @@ function LoginScreen({ onLogin, onBack, loading }) {
             {err && <div style={{ color: "var(--orange)", fontSize: 12, marginTop: 6 }}>{err}</div>}
           </div>
           <button className="btn-accent" style={{ width: "100%" }} onClick={handleSubmit} disabled={loading}>
-            {loading ? <Spinner size={14} /> : "Ingresar"}
+            {loading ? <Spinner size={14} /> : "Ingresar →"}
           </button>
         </div>
       </div>
@@ -1008,14 +1011,23 @@ export default function App() {
   const loadAll = useCallback(async () => {
     setLoadError(null);
     try {
-      const res = await apiFetch("getAll");
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      const qs = new URLSearchParams({ action: "getAll" }).toString();
+      const raw = await fetch(`${API_URL}?${qs}`, { signal: controller.signal });
+      clearTimeout(timeout);
+      const res = await raw.json();
       if (res.ok) {
         setAppData(res.data);
       } else {
-        setLoadError(res.error || "Error al cargar datos");
+        setLoadError(res.error || "Error al cargar datos del servidor.");
       }
     } catch (e) {
-      setLoadError("No se pudo conectar con el servidor. Verificá la URL del Apps Script.");
+      if (e && e.name === "AbortError") {
+        setLoadError("El servidor tardó demasiado. Verificá que el Apps Script esté deployado y reintentá.");
+      } else {
+        setLoadError("No se pudo conectar. Verificá la URL del Apps Script en el código.");
+      }
     }
   }, []);
 
