@@ -577,6 +577,30 @@ function StatsBar({ files }) {
   );
 }
 
+// ─── DRIVE UTILS ─────────────────────────────────────────────────────────────
+
+function extractDriveId(input) {
+  if (!input) return "";
+  const patterns = [
+    /\/file\/d\/([a-zA-Z0-9_-]{10,})/,
+    /[?&]id=([a-zA-Z0-9_-]{10,})/,
+    /\/d\/([a-zA-Z0-9_-]{10,})/,
+  ];
+  for (const p of patterns) {
+    const m = input.match(p);
+    if (m) return m[1];
+  }
+  return input.trim();
+}
+
+function driveEmbedUrl(driveId) {
+  return `https://drive.google.com/file/d/${driveId}/preview`;
+}
+
+function driveOpenUrl(driveId) {
+  return `https://drive.google.com/file/d/${driveId}/view`;
+}
+
 // ─── ADD FILE MODAL ───────────────────────────────────────────────────────────
 
 const FILE_TYPES = [
