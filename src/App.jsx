@@ -989,15 +989,13 @@ export default function App() {
   const [screen, setScreen] = useState("gate"); // gate | login | app
   const [isAdmin, setIsAdmin] = useState(false);
   const [view, setView] = useState("client"); // admin | client
-  const [appData, setAppData] = useState(null);
+  const [appData, setAppData] = useState({ config: { eventName: "SAP NOW AI Tour 2026" }, categories: [], files: [] });
   const [loadError, setLoadError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showAddFile, setShowAddFile] = useState(false);
   const [showManageCats, setShowManageCats] = useState(false);
   const [filterCat, setFilterCat] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
-
-  const EMPTY_DATA = { config: { eventName: "SAP NOW AI Tour 2026" }, categories: [], files: [] };
 
   const loadAll = useCallback(async () => {
     setLoadError(null);
@@ -1007,22 +1005,19 @@ export default function App() {
       const text = await raw.text();
       let res;
       try { res = JSON.parse(text); } catch(parseErr) {
-        // Apps Script devolvió HTML (error de Google) — mostrar app vacía
+        // Apps Script devolvió HTML (error de Google) — dejar datos como están
         console.error("Respuesta no-JSON del servidor:", text.slice(0, 200));
-        setAppData(EMPTY_DATA);
         return;
       }
       if (res.ok) {
         setAppData(res.data);
       } else {
-        // Error del script pero podemos mostrar la app vacía igual
+        // Error del script — dejar datos como están
         console.error("Error del script:", res.error);
-        setAppData(EMPTY_DATA);
       }
     } catch (e) {
       console.error("Error de red:", e.message);
-      // En vez de bloquear con error, mostrar app vacía
-      setAppData(EMPTY_DATA);
+      // Dejar datos como están (estado inicial vacío)
     }
   }, []);
 
@@ -1092,13 +1087,8 @@ export default function App() {
     );
   }
 
-  if (screen === "app" && !appData && !loadError) {
-    return <><style>{css}</style><LoadingScreen message="Conectando con el servidor..." /></>;
-  }
-
-  if (loadError) {
-    return <><style>{css}</style><ErrorScreen message={loadError} onRetry={loadAll} /></>;
-  }
+  // Si está cargando datos del servidor, mostrar un banner sutil (no bloquear)
+  // appData siempre tiene datos (vacíos o del server)
 
   const { config, categories, files } = appData;
   const showAdmin = isAdmin && view === "admin";
