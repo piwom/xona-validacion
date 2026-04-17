@@ -5,23 +5,15 @@ import { useState, useEffect, useCallback } from "react";
 const API_URL = "https://script.google.com/macros/s/AKfycbwcW3LGi7MxeAS5QV9p_UDyMejss-LYYYisC4iJdzrMjt-TcliJI24pWuNaNzbmrbSM4w/exec";
 const ADMIN_PASSWORD_LOCAL = "xona2026"; // fallback local, el real está en el script
 
-// ─── API CLIENT ───────────────────────────────────────────────────────────────
+// ─── API CLIENT — todo GET para evitar CORS con Apps Script ──────────────────
 
-async function api(action, data = {}, method = "GET") {
-  const url = `${API_URL}?action=${action}`;
-  const opts = method === "POST"
-    ? { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }
-    : { method: "GET" };
-  const res = await fetch(url, opts);
-  return res.json();
-}
-
-const apiFetch = (action, params = {}) => {
+const apiCall = (action, params = {}) => {
   const qs = new URLSearchParams({ action, ...params }).toString();
   return fetch(`${API_URL}?${qs}`).then(r => r.json());
 };
 
-const apiPost = (action, body) => api(action, body, "POST");
+const apiFetch = apiCall;
+const apiPost = (action, body) => apiCall(action, body);
 
 // ─── STYLES ───────────────────────────────────────────────────────────────────
 
