@@ -18,27 +18,27 @@ const apiPost = (action, body) => apiCall(action, body);
 // ─── STYLES ───────────────────────────────────────────────────────────────────
 
 const css = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0a0a0a;
-    --surface: #111111;
-    --surface2: #161616;
-    --border: #1e1e1e;
-    --border-light: #282828;
+    --bg: #050d1a;
+    --surface: #0a1a35;
+    --surface2: #0d2040;
+    --border: rgba(0,112,242,0.15);
+    --border-light: rgba(0,112,242,0.25);
     --text: #f0f0f0;
-    --muted: #555;
-    --muted2: #888;
-    --accent: #c8ff00;
-    --accent-dim: rgba(200,255,0,0.08);
-    --accent-border: rgba(200,255,0,0.25);
+    --muted: rgba(255,255,255,0.35);
+    --muted2: rgba(255,255,255,0.6);
+    --accent: var(--sap-blue-7);
+    --accent-dim: rgba(0,112,242,0.1);
+    --accent-border: rgba(0,112,242,0.3);
     --orange: #f97316;
-    --green: #4ade80;
-    --font-display: 'DM Serif Display', serif;
-    --font-ui: 'Syne', sans-serif;
-    --font-mono: 'DM Mono', monospace;
+    --green: #2CE0BF;
+    --font-display: 'IBM Plex Sans', sans-serif;
+    --font-ui: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
   }
 
   body {
@@ -65,7 +65,7 @@ const css = `
     transition: border-color 0.2s;
     width: 100%;
   }
-  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  input:focus, textarea:focus, select:focus { border-color: var(--sap-blue-7); }
   input::placeholder, textarea::placeholder { color: var(--muted); }
   select option { background: #1a1a1a; }
 
@@ -172,11 +172,88 @@ const css = `
   }
 `;
 
+// ─── SAP LOGO SVG ────────────────────────────────────────────────────────────
+
+function SAPLogo({ size = 28 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="3" fill="#0070F2"/>
+      <path d="M4 20L12 8h4L8 20H4z" fill="white"/>
+      <path d="M12 20l4-6 4 6h-4l-2-3-2 3h-4z" fill="white" opacity="0.7"/>
+    </svg>
+  );
+}
+
+function XonaLogo({ size = 22 }) {
+  // Recreación del isologo X amarillo de Xona
+  return (
+    <svg width={size} height={size * 0.85} viewBox="0 0 44 38" fill="none">
+      <path d="M0 0 L16 0 L22 10 L28 0 L44 0 L30 19 L44 38 L28 38 L22 28 L16 38 L0 38 L14 19 Z" fill="#F5A800"/>
+      <path d="M14 19 L22 10 L22 28 Z" fill="#c48400" opacity="0.4"/>
+    </svg>
+  );
+}
+
+function SAPNOWWordmark({ size = "md" }) {
+  const sizes = {
+    sm: { main: 13, sub: 10, gap: 6 },
+    md: { main: 16, sub: 12, gap: 8 },
+    lg: { main: 22, sub: 16, gap: 10 },
+    xl: { main: 32, sub: 22, gap: 12 },
+  };
+  const s = sizes[size] || sizes.md;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      <div style={{
+        fontFamily: "var(--font-ui)", fontWeight: 700,
+        fontSize: s.main, color: "white", letterSpacing: "-0.01em", lineHeight: 1,
+      }}>
+        SAP NOW <span style={{ color: "var(--sap-indigo-6)" }}>AI Tour</span>
+      </div>
+      {size !== "sm" && (
+        <div style={{
+          fontFamily: "var(--font-ui)", fontWeight: 400,
+          fontSize: s.sub, color: "rgba(137,209,255,0.7)", letterSpacing: "0.05em",
+          lineHeight: 1,
+        }}>
+          ARGENTINA 2026
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Star decoration (SAP AI element)
+function Stars({ count = 3, style = {} }) {
+  const positions = [
+    { top: "10%", right: "5%", size: 14, delay: "0s" },
+    { top: "30%", right: "15%", size: 8, delay: "0.4s" },
+    { top: "60%", right: "8%", size: 10, delay: "0.8s" },
+    { top: "20%", left: "5%", size: 6, delay: "0.2s" },
+    { bottom: "20%", right: "20%", size: 7, delay: "0.6s" },
+  ].slice(0, count);
+  return (
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden", ...style }}>
+      {positions.map((p, i) => (
+        <div key={i} style={{
+          position: "absolute", ...p, size: undefined,
+          width: p.size, height: p.size,
+          animation: `starPulse 2s ease-in-out ${p.delay} infinite`,
+        }}>
+          <svg width={p.size} height={p.size} viewBox="0 0 14 14" fill="none">
+            <path d="M7 0L8.2 5.8L14 7L8.2 8.2L7 14L5.8 8.2L0 7L5.8 5.8Z" fill="white" opacity="0.6"/>
+          </svg>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── STATUS CONFIG ────────────────────────────────────────────────────────────
 
 const STATUS = {
-  pending:  { label: "Pendiente",         color: "#666", bg: "rgba(100,100,100,0.1)", icon: "·" },
-  approved: { label: "Aprobado",          color: "#4ade80", bg: "rgba(74,222,128,0.1)", icon: "✓" },
+  pending:  { label: "Pendiente",         color: "rgba(137,209,255,0.7)", bg: "rgba(0,112,242,0.1)", icon: "·" },
+  approved: { label: "Aprobado",          color: "#2CE0BF", bg: "rgba(44,224,191,0.1)", icon: "✓" },
   rejected: { label: "Con observaciones", color: "#f97316", bg: "rgba(249,115,22,0.1)", icon: "!" },
 };
 
@@ -195,8 +272,8 @@ function Spinner({ size = 16 }) {
   return (
     <div className="spin" style={{
       width: size, height: size,
-      border: `2px solid var(--border-light)`,
-      borderTopColor: "var(--accent)",
+      border: `2px solid rgba(0,112,242,0.2)`,
+      borderTopColor: "var(--sap-blue-7)",
       borderRadius: "50%",
       display: "inline-block",
     }} />
@@ -241,7 +318,7 @@ function ErrorScreen({ message, onRetry }) {
       background: "var(--bg)", padding: 24,
     }}>
       <div style={{ fontSize: 32 }}>⚠️</div>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 24, textAlign: "center" }}>
+      <div style={{ fontSize: 22, fontWeight: 700, textAlign: "center", color: "var(--sap-blue-4)" }}>
         Error de conexión
       </div>
       <div style={{ fontSize: 13, color: "var(--muted2)", textAlign: "center", maxWidth: 400, lineHeight: 1.6 }}>
@@ -254,61 +331,100 @@ function ErrorScreen({ message, onRetry }) {
 
 // ─── GATE SCREEN ─────────────────────────────────────────────────────────────
 
-function GateScreen({ eventName, onClient, onAdmin }) {
+function GateScreen({ onClient, onAdmin }) {
   return (
     <div style={{
       minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-      background: "var(--bg)", padding: 20,
+      background: "var(--bg)", padding: 20, position: "relative", overflow: "hidden",
     }}>
-      {/* Background texture */}
+      {/* Gradient glow background */}
       <div style={{
-        position: "fixed", inset: 0, opacity: 0.03,
-        backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 40px, #fff 40px, #fff 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, #fff 40px, #fff 41px)",
+        position: "fixed", top: "-20%", left: "-10%",
+        width: "60%", height: "60%",
+        background: "radial-gradient(ellipse, rgba(0,112,242,0.15) 0%, transparent 70%)",
         pointerEvents: "none",
-      }} />
+      }}/>
+      <div style={{
+        position: "fixed", bottom: "-10%", right: "-5%",
+        width: "50%", height: "50%",
+        background: "radial-gradient(ellipse, rgba(120,88,255,0.12) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }}/>
 
-      <div style={{ width: "100%", maxWidth: 420, animation: "slideUp 0.4s ease", position: "relative" }}>
-        <div style={{ textAlign: "center", marginBottom: 52 }}>
-          <div style={{
-            fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--accent)",
-            letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 18,
-          }}>
-            Xona · Previa operativa
+      <Stars count={5} style={{ position: "fixed" }} />
+
+      <div style={{ width: "100%", maxWidth: 440, animation: "slideUp 0.4s ease", position: "relative" }}>
+
+        {/* SAP logo + Xona badge */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          marginBottom: 44,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <SAPLogo size={32} />
+            <SAPNOWWordmark size="md" />
           </div>
           <div style={{
-            fontFamily: "var(--font-display)", fontSize: 44, lineHeight: 1.0,
-            marginBottom: 10, letterSpacing: "-0.01em",
+            display: "flex", alignItems: "center", gap: 6,
+            background: "rgba(245,168,0,0.08)", border: "1px solid rgba(245,168,0,0.2)",
+            borderRadius: 6, padding: "5px 10px",
           }}>
-            {eventName}
-          </div>
-          <div style={{ color: "var(--muted2)", fontSize: 14, letterSpacing: "0.02em" }}>
-            Plataforma de validación de archivos
+            <XonaLogo size={16} />
+            <span style={{ fontFamily: "var(--font-ui)", fontWeight: 700, fontSize: 11, color: "var(--xona-gold)", letterSpacing: "0.08em" }}>
+              XONA
+            </span>
           </div>
         </div>
 
+        {/* Hero text */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={{
+            fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--sap-blue-4)",
+            letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 14,
+          }}>
+            Previa operativa
+          </div>
+          <div style={{
+            fontFamily: "var(--font-ui)", fontWeight: 700,
+            fontSize: 38, lineHeight: 1.05, marginBottom: 10,
+            letterSpacing: "-0.02em",
+          }}>
+            Validación de<br />archivos
+          </div>
+          <div style={{ color: "var(--muted2)", fontSize: 14, lineHeight: 1.6 }}>
+            Revisá, comentá y aprobá los materiales<br />del evento en un solo lugar.
+          </div>
+        </div>
+
+        {/* CTA buttons */}
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <button
             className="btn-accent"
-            style={{ padding: "18px", fontSize: 13, borderRadius: 12, letterSpacing: "0.08em" }}
+            style={{ padding: "16px", fontSize: 13, borderRadius: 10, letterSpacing: "0.04em" }}
             onClick={onClient}
           >
-            Soy cliente → Validar archivos
+            ✦ Entrar como cliente SAP
           </button>
           <button
             className="btn-ghost"
-            style={{ padding: "14px", fontSize: 12, borderRadius: 12 }}
+            style={{ padding: "12px", fontSize: 11, borderRadius: 10 }}
             onClick={onAdmin}
           >
-            Acceso admin
+            Acceso Xona · Admin
           </button>
         </div>
 
+        {/* Bottom tagline */}
         <div style={{
-          marginTop: 48, textAlign: "center",
-          fontFamily: "var(--font-mono)", fontSize: 10,
-          color: "var(--border-light)", letterSpacing: "0.12em",
+          marginTop: 36,
+          display: "flex", alignItems: "center", gap: 10,
+          opacity: 0.35,
         }}>
-          POWERED BY XONA
+          <div style={{ flex: 1, height: 1, background: "var(--border-light)" }}/>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--muted)", letterSpacing: "0.15em" }}>
+            BRING IT AT SAP NOW AI TOUR
+          </span>
+          <div style={{ flex: 1, height: 1, background: "var(--border-light)" }}/>
         </div>
       </div>
     </div>
@@ -340,14 +456,26 @@ function LoginScreen({ onLogin, onBack, loading }) {
         <button className="btn-ghost" onClick={onBack} style={{ marginBottom: 32, padding: "7px 14px", fontSize: 11 }}>
           ← Volver
         </button>
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--accent)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12 }}>
-            Admin
-          </div>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 30 }}>Acceso restringido</div>
+
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 28 }}>
+          <XonaLogo size={20} />
+          <span style={{ fontFamily: "var(--font-ui)", fontWeight: 700, fontSize: 14, color: "var(--xona-gold)", letterSpacing: "0.06em" }}>
+            XONA · Admin
+          </span>
         </div>
 
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border-light)", borderRadius: 12, padding: 24 }}>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontFamily: "var(--font-ui)", fontWeight: 700, fontSize: 26, marginBottom: 6 }}>
+            Acceso restringido
+          </div>
+          <div style={{ fontSize: 13, color: "var(--muted2)" }}>SAP NOW AI Tour 2026</div>
+        </div>
+
+        <div style={{
+          background: "var(--surface)", border: "1px solid var(--border-light)",
+          borderRadius: 12, padding: 24,
+        }}>
           <div className="field">
             <Label>Contraseña</Label>
             <input
@@ -372,23 +500,25 @@ function LoginScreen({ onLogin, onBack, loading }) {
 
 // ─── HEADER ───────────────────────────────────────────────────────────────────
 
-function Header({ eventName, isAdmin, view, onSetView, onLogout }) {
+function Header({ isAdmin, view, onSetView, onLogout }) {
   return (
     <header style={{
       borderBottom: "1px solid var(--border)",
-      padding: "14px 28px",
+      padding: "12px 24px",
       display: "flex", alignItems: "center", justifyContent: "space-between",
       position: "sticky", top: 0,
-      background: "rgba(10,10,10,0.96)",
-      backdropFilter: "blur(16px)",
+      background: "rgba(5,13,26,0.95)",
+      backdropFilter: "blur(20px)",
       zIndex: 100,
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: 20, letterSpacing: "-0.01em" }}>Xona</div>
-        <div style={{ width: 1, height: 18, background: "var(--border)" }} />
-        <div style={{ fontSize: 13, color: "var(--muted2)", letterSpacing: "0.01em" }}>{eventName}</div>
+      {/* Left: SAP NOW wordmark */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <SAPLogo size={26} />
+        <div style={{ width: 1, height: 28, background: "var(--border-light)" }} />
+        <SAPNOWWordmark size="sm" />
       </div>
 
+      {/* Right: admin controls or client badge */}
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         {isAdmin ? (
           <>
@@ -398,20 +528,31 @@ function Header({ eventName, isAdmin, view, onSetView, onLogout }) {
                 onClick={() => onSetView(v)}
                 style={{
                   padding: "7px 14px", fontSize: 11, borderRadius: 6,
-                  background: view === v ? "var(--accent)" : "transparent",
-                  color: view === v ? "#000" : "var(--muted2)",
-                  border: `1px solid ${view === v ? "var(--accent)" : "var(--border-light)"}`,
+                  background: view === v ? "var(--sap-blue-7)" : "transparent",
+                  color: view === v ? "#fff" : "var(--muted2)",
+                  border: `1px solid ${view === v ? "var(--sap-blue-7)" : "var(--border-light)"}`,
                   fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
                 }}
               >
                 {v === "admin" ? "Admin" : "Vista cliente"}
               </button>
             ))}
+            <div style={{ width: 1, height: 20, background: "var(--border-light)", margin: "0 4px" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <XonaLogo size={14} />
+            </div>
             <button className="btn-ghost" onClick={onLogout} style={{ padding: "7px 12px" }}>Salir</button>
           </>
         ) : (
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-            Vista cliente
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{
+              background: "rgba(44,224,191,0.1)", border: "1px solid rgba(44,224,191,0.2)",
+              borderRadius: 100, padding: "4px 10px",
+              fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--green)",
+              letterSpacing: "0.1em", textTransform: "uppercase",
+            }}>
+              ✦ Portal cliente
+            </div>
           </div>
         )}
       </div>
@@ -423,7 +564,7 @@ function Header({ eventName, isAdmin, view, onSetView, onLogout }) {
 
 function StatsBar({ files }) {
   const stats = [
-    { label: "Total",      val: files.length,                                  color: "var(--text)" },
+    { label: "Total",      val: files.length,                                     color: "var(--sap-blue-4)" },
     { label: "Aprobados",  val: files.filter(f => f.status === "approved").length, color: "var(--green)" },
     { label: "Con obs.",   val: files.filter(f => f.status === "rejected").length, color: "var(--orange)" },
     { label: "Pendientes", val: files.filter(f => f.status === "pending").length,  color: "var(--muted2)" },
@@ -436,42 +577,12 @@ function StatsBar({ files }) {
           background: "var(--surface)",
           borderRight: i < stats.length - 1 ? "1px solid var(--border)" : "none",
         }}>
-          <div style={{ fontSize: 26, fontWeight: 800, color: s.color, fontFamily: "var(--font-mono)", lineHeight: 1 }}>{s.val}</div>
+          <div style={{ fontSize: 26, fontWeight: 700, color: s.color, fontFamily: "var(--font-mono)", lineHeight: 1 }}>{s.val}</div>
           <div style={{ fontSize: 10, color: "var(--muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 4 }}>{s.label}</div>
         </div>
       ))}
     </div>
   );
-}
-
-// ─── DRIVE UTILS ─────────────────────────────────────────────────────────────
-
-// Extrae el ID de Drive desde una URL completa, o devuelve el string tal cual si ya es un ID
-function extractDriveId(input) {
-  if (!input) return "";
-  // Formatos posibles:
-  // https://drive.google.com/file/d/ID/view
-  // https://drive.google.com/open?id=ID
-  // https://docs.google.com/document/d/ID/edit
-  const patterns = [
-    /\/file\/d\/([a-zA-Z0-9_-]{10,})/,
-    /[?&]id=([a-zA-Z0-9_-]{10,})/,
-    /\/d\/([a-zA-Z0-9_-]{10,})/,
-  ];
-  for (const p of patterns) {
-    const m = input.match(p);
-    if (m) return m[1];
-  }
-  // Si no matchea ningún patrón, asumimos que ya es un ID
-  return input.trim();
-}
-
-function driveEmbedUrl(driveId) {
-  return `https://drive.google.com/file/d/${driveId}/preview`;
-}
-
-function driveOpenUrl(driveId) {
-  return `https://drive.google.com/file/d/${driveId}/view`;
 }
 
 // ─── ADD FILE MODAL ───────────────────────────────────────────────────────────
@@ -515,7 +626,7 @@ function AddFileModal({ categories, onAdd, onClose }) {
     <div className="modal-overlay">
       <div className="modal">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 24 }}>Nuevo archivo</div>
+          <div style={{ fontWeight: 700, fontSize: 22 }}>Nuevo archivo</div>
           <button className="btn-ghost" onClick={onClose} style={{ padding: "5px 10px" }}>✕</button>
         </div>
 
@@ -609,7 +720,7 @@ function ManageCategoriesModal({ categories, onAdd, onDelete, onClose }) {
     <div className="modal-overlay">
       <div className="modal">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 24 }}>Categorías</div>
+          <div style={{ fontWeight: 700, fontSize: 22 }}>Categorías</div>
           <button className="btn-ghost" onClick={onClose} style={{ padding: "5px 10px" }}>✕</button>
         </div>
 
@@ -954,7 +1065,6 @@ export default function App() {
       <>
         <style>{css}</style>
         <GateScreen
-          eventName="SAP NOW 2026"
           onClient={() => { setIsAdmin(false); setView("client"); setScreen("app"); }}
           onAdmin={() => setScreen("login")}
         />
@@ -997,7 +1107,6 @@ export default function App() {
       <style>{css}</style>
       <div style={{ minHeight: "100vh" }}>
         <Header
-          eventName={config.eventName}
           isAdmin={isAdmin}
           view={view}
           onSetView={setView}
@@ -1010,7 +1119,7 @@ export default function App() {
           {showAdmin && (
             <div className="fade-in" style={{ marginBottom: 36 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: 28 }}>Panel de control</div>
+                <div style={{ fontWeight: 700, fontSize: 26 }}>Panel de control</div>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button className="btn-ghost" onClick={() => setShowManageCats(true)} style={{ padding: "9px 16px" }}>
                     ⚙ Categorías
@@ -1044,7 +1153,7 @@ export default function App() {
               }}>
                 Archivos para revisión
               </div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 36, marginBottom: 8 }}>
+              <div style={{ fontWeight: 700, fontSize: 28, marginBottom: 8 }}>
                 {config.eventName}
               </div>
               <div style={{ fontSize: 14, color: "var(--muted2)", lineHeight: 1.6, maxWidth: 560 }}>
