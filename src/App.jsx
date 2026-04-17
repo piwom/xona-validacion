@@ -174,18 +174,7 @@ const css = `
 
 // ─── SAP LOGO SVG ────────────────────────────────────────────────────────────
 
-function SAPLogo({ size = 32 }) {
-  // Logo SAP oficial: cuadrado azul con triángulo blanco (la "flecha" del brand)
-  return (
-    <svg width={size} height={size} viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="44" height="44" rx="4" fill="#0070F2"/>
-      {/* Triángulo principal — la "flecha" blanca diagonal del logo SAP */}
-      <polygon points="10,10 34,10 34,34" fill="white"/>
-      {/* Línea de detalle — el borde interior translúcido */}
-      <line x1="10" y1="10" x2="34" y2="34" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5"/>
-    </svg>
-  );
-}
+
 
 function XonaLogo({ size = 22 }) {
   // Recreación del isologo X amarillo de Xona
@@ -364,7 +353,7 @@ function GateScreen({ onClient, onAdmin }) {
           marginBottom: 44,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <SAPLogo size={32} />
+            
             <SAPNOWWordmark size="md" />
           </div>
           <div style={{
@@ -516,7 +505,7 @@ function Header({ isAdmin, view, onSetView, onLogout }) {
     }}>
       {/* Left: SAP NOW wordmark */}
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <SAPLogo size={26} />
+        
         <div style={{ width: 1, height: 28, background: "var(--border-light)" }} />
         <SAPNOWWordmark size="sm" />
       </div>
@@ -1008,26 +997,32 @@ export default function App() {
   const [filterCat, setFilterCat] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
+  const EMPTY_DATA = { config: { eventName: "SAP NOW AI Tour 2026" }, categories: [], files: [] };
+
   const loadAll = useCallback(async () => {
     setLoadError(null);
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000);
       const qs = new URLSearchParams({ action: "getAll" }).toString();
-      const raw = await fetch(`${API_URL}?${qs}`, { signal: controller.signal });
-      clearTimeout(timeout);
-      const res = await raw.json();
+      const raw = await fetch(`${API_URL}?${qs}`);
+      const text = await raw.text();
+      let res;
+      try { res = JSON.parse(text); } catch(parseErr) {
+        // Apps Script devolvió HTML (error de Google) — mostrar app vacía
+        console.error("Respuesta no-JSON del servidor:", text.slice(0, 200));
+        setAppData(EMPTY_DATA);
+        return;
+      }
       if (res.ok) {
         setAppData(res.data);
       } else {
-        setLoadError(res.error || "Error al cargar datos del servidor.");
+        // Error del script pero podemos mostrar la app vacía igual
+        console.error("Error del script:", res.error);
+        setAppData(EMPTY_DATA);
       }
     } catch (e) {
-      if (e && e.name === "AbortError") {
-        setLoadError("El servidor tardó demasiado. Verificá que el Apps Script esté deployado y reintentá.");
-      } else {
-        setLoadError("No se pudo conectar. Verificá la URL del Apps Script en el código.");
-      }
+      console.error("Error de red:", e.message);
+      // En vez de bloquear con error, mostrar app vacía
+      setAppData(EMPTY_DATA);
     }
   }, []);
 
